@@ -2,7 +2,7 @@
 
 A new Flutter project.
 
-## Sample Pages(6)
+## Sample Pages(7)
 
 ![page7](https://github.com/user-attachments/assets/b6be243c-8c39-4ce2-a51a-e23b74a432c1)
 ![page6](https://github.com/user-attachments/assets/7b972e9b-97e4-45fe-8755-f161b8d7cf86)
