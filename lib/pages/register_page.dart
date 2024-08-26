@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:social_media_app/auth/auth.dart';
 
 import '../componets/my_button.dart';
 import '../componets/my_textField.dart';
@@ -136,11 +138,31 @@ class _RegisterPageState extends State<RegisterPage> {
         password: passwordController.text,
       );
 
+      createUserDocument(userCredential);
+
       Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AuthPage(),
+        ),
+      );
       displayMessageToUser(context, 'S U C C E S S');
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
       displayMessageToUser(context, e.code);
+    }
+  }
+
+  Future<void> createUserDocument(UserCredential? userCredential) async {
+    if (userCredential != null && userCredential.user != null) {
+     await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userCredential.user!.email)
+          .set({
+        'email': userCredential.user!.email,
+        'userName': userNameController.text,
+      });
     }
   }
 }

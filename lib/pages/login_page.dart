@@ -4,6 +4,8 @@ import 'package:social_media_app/componets/my_button.dart';
 import 'package:social_media_app/componets/my_textField.dart';
 import 'package:social_media_app/helper/helper_function.dart';
 
+import '../auth/auth.dart';
+
 class LoginPage extends StatefulWidget {
   final void Function()? onTap;
 
@@ -109,7 +111,12 @@ class _LoginPageState extends State<LoginPage> {
           .signInWithEmailAndPassword(
               email: emailController.text, password: passwordController.text);
 
-      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AuthPage(),
+        ),
+      );
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
       displayMessageToUser(context, e.code);

@@ -1,40 +1,95 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:social_media_app/auth/login_or_register.dart';
+import 'package:social_media_app/componets/my_post_button.dart';
+import 'package:social_media_app/componets/my_textField.dart';
+
+import '../componets/my_drawer.dart';
+import '../componets/my_list_tile.dart';
+import '../database/firestore.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  HomePage({super.key});
+
+  final TextEditingController newPostController = TextEditingController();
+  final FireStoreDatabase database = FireStoreDatabase();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Theme.of(context).colorScheme.inversePrimary,
         centerTitle: true,
+        elevation: 0,
         title: const Text(
-          'Home',
-          style: TextStyle(
-            color: Colors.white,
-          ),
+          'W A L L',
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const LoginOrRegister(),
+      ),
+      drawer: const MyDrawer(),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(25),
+            child: Row(
+              children: [
+                Expanded(
+                  child: MyTextField(
+                    textHint: 'Say something',
+                    obscureText: false,
+                    controller: newPostController,
+                  ),
                 ),
-              );
-            },
-            icon: const Icon(
-              Icons.logout,
-              color: Colors.white,
+                PostButton(
+                  onTap: postMessage,
+                ),
+              ],
             ),
           ),
+          StreamBuilder(
+              stream: database.getPostStream(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                final posts = snapshot.data!.docs;
+                if (snapshot.data == null || posts.isEmpty) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(25),
+                      child: Text('No Posts.. Post something'),
+                    ),
+                  );
+                }
+
+                return Expanded(
+                  child: ListView.builder(
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        final post = posts[index];
+
+                        String message = post['postMessage'];
+                        String userEmail = post['userEmail'];
+                        Timestamp timeStamp = post['timeStamp'];
+
+                        return MyListTile(
+                          message: message,
+                          userEmail: userEmail,
+                        );
+                      }),
+                );
+              }),
         ],
       ),
     );
+  }
+
+  void postMessage() {
+    if (newPostController.text.isNotEmpty) {
+      database.addPost(newPostController.text);
+      newPostController.clear();
+    }
   }
 }
